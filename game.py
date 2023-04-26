@@ -51,6 +51,11 @@ def createBoard(row, column):
                     board[i][j] = 3 
             elif i==(row-1):
                 board[i][j] = 6
+
+    # Geracao de buracos no tabuleiro
+    for i in range(row):
+        board[i][random.randint(0,column-1)] = 1   # numero 1 indica que existe um buraco
+
     return board
     
 # Cria quadrado
@@ -68,11 +73,9 @@ def drawBoard(board):
     for row in range(rows):
         for column in range(columns):
             # desenha quadrado preto
-            if board[row][column] == 0:
+            if board[row][column] == 0 or board[row][column] == 1:  # numero 1 indica que existe buraco
                 drawSquare(row, column, orange)
             # desenha quadrado vermelho
-            elif board[row][column] == 1:
-                drawSquare(row, column, red)
             # desenha quadrado amarelo
             elif board[row][column] == 2:
                 drawSquare(row, column, yellow)
@@ -87,6 +90,8 @@ def drawBoard(board):
                 drawSquare(row, column, white)
             elif board[row][column] == 4:
                 drawSquare(row, column, lightOrange)
+            elif board[row][column] == 7:   # se for 7, indica que o buraco foi pisado
+                drawSquare(row, column, red)  
 
 # define movimento do jogador
 def movePlayer(direction):
@@ -96,11 +101,16 @@ def movePlayer(direction):
     yTrail, xTrail = (yPlayer,xPlayer)
     xPlayer += direction[0]
     yPlayer += direction[1]
+
+    if board[yPlayer][xPlayer] == 1 or board[yPlayer][xPlayer] == 7: # caso ele passe em um buraco
+        board[yPlayer][xPlayer] = 7
+        xPlayer, yPlayer = (random.randint(0,columns-1),rows-1)
+    
+       
+
     corLast = board[yPlayer][xPlayer]
     board[yPlayer][xPlayer] = 2
 
-    print("xPlayer: ", xPlayer, "yPlayer: ", yPlayer)
-    print("xTrail: ", xTrail, "yTrail: ", yTrail)
 
 board = createBoard(rows, columns)
 # posicao inicial do jogador
