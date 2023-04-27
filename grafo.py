@@ -13,22 +13,20 @@ class Graph:
         self.adj_matrix[v1][v2] = 0
         self.adj_matrix[v2][v1] = 0
     
-    # transforma tabuleiro em grafo
-    def createGrafo(self, board):
-        for i in range(len(board)):
-            for j in range(len(board)):
-                if board[i][j] == 0:
-                    self.add_edge(i, j)
-                elif board[i][j] == 1:
-                    self.remove_edge(i, j)
-        return self.adj_matrix
-    
-    # dfs
-    def dfs(self, v):
-        path = []
-        self.visited[v] = True
-        for i in range(self.num_vertices):
-            if self.adj_matrix[v][i] == 1 and not self.visited[i]:
-                path.append([v, i])
-                self.dfs(i)
-        return path
+    #tranforma matriz em grafo
+    def matrix_to_graph(self, matrix):
+        element = 0
+        for i in range(len(matrix)):
+            for j in range(len(matrix[i])):
+                if matrix[i][j] != 7:
+                    # checa se é possivel ir para a direita, esquerda, cima ou baixo
+                    if i+1 < len(matrix) and matrix[i+1][j] != 7:
+                        self.add_edge(element, len(matrix[i])+element)
+                    if j+1 < len(matrix[i]) and matrix[i][j+1] != 7:
+                        self.add_edge(element, element+1)
+                    if i-1 >= 0 and matrix[i-1][j] != 7:
+                        self.add_edge(element, element-len(matrix[i]))
+                    if j-1 >= 0 and matrix[i][j-1] != 7:
+                        self.add_edge(element, element-1)
+                self.add_edge(element, element)
+                element += 1

@@ -1,6 +1,7 @@
 import pygame, sys
 from pygame.locals import *
 import random
+import grafo as gf
 
 # Configurações do tabuleiro
 square_size = 50
@@ -11,6 +12,7 @@ board_height = 8 * square_size + 9 * square_margin
 rows = 15
 columns = 15
 size = width, height = ((square_size + square_margin)*rows, (square_size + square_margin)*columns)
+graph = gf.Graph(rows*columns)
 
 # cores
 black = (0, 0, 0)
@@ -25,7 +27,6 @@ orange = (223, 118, 2)
 lightOrange = (255, 195, 128)
 lightBlue = '#5dc9ee'
 secondary_pink = '#ff799b'
-
 
 
 pygame.init()
@@ -58,7 +59,6 @@ def createBoard(row, column):
     for i in range(2, row-1):
         board[i][random.randint(0,column-1)] = 1   # numero 1 indica que existe um buraco
     
-    print(board)
     return board
     
 # Cria quadrado
@@ -92,7 +92,7 @@ def drawBoard(board):
 
 # define movimento do jogador
 def movePlayer(direction):
-    global xPlayer, yPlayer, trail, columns, rows, running
+    global xPlayer, yPlayer, trail, columns, rows
 
     if len(trail) >= 1:
         x, y, cor = trail.pop(0)
@@ -100,7 +100,6 @@ def movePlayer(direction):
 
     xPlayer += direction[0]
     yPlayer += direction[1]
-    print(xPlayer, yPlayer)
 
     if board[yPlayer][xPlayer] == 1 or board[yPlayer][xPlayer] == 7: # caso ele passe em um buraco
         board[yPlayer][xPlayer] = 7
@@ -108,9 +107,9 @@ def movePlayer(direction):
         board[yPlayer][xPlayer] = 2
         cleanTrail()
         trail.append([xPlayer, yPlayer, 6])
+        graph.matrix_to_graph(board)
     elif  yPlayer<=1: # caso ele chegue ao final
         win()
-        running = False
     else:
         drawTrail()
         if [xPlayer, yPlayer, 6] not in trail:
@@ -137,19 +136,19 @@ def win():
     screen.blit(text, text_rect)
 
 
+
 board = createBoard(rows, columns)
 # posicao inicial do jogador
 player = xPlayer, yPlayer = (random.randint(0,columns-1),rows-1)
-#guarda ultimas possicoes do jogador para desenhar o rastro
 trail = []
 trail.append([xPlayer, yPlayer, board[yPlayer][xPlayer]])
 board[yPlayer][xPlayer] = 2
 
+# carrega imagem do jogador
 playerIcon = pygame.image.load('jujuba.png')
 playerIcon = pygame.transform.scale(playerIcon, (square_size, square_size))
 player_loc = playerIcon.get_rect()
 player_loc.center = centralizeImage()
-
 
 # Definir as fontes
 font = pygame.font.Font(None, 36)
@@ -158,10 +157,7 @@ fontFooter = pygame.font.SysFont('verdana', 20, italic = pygame.font.Font.italic
 
 def computer_play():
     while True:
-
         screen.fill("white")
-        
-
         pygame.display.update()
 
 
