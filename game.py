@@ -2,7 +2,6 @@ import pygame
 from pygame.locals import *
 import random
 
-
 # Configurações do tabuleiro
 square_size = 50
 square_margin = 3
@@ -53,9 +52,10 @@ def createBoard(row, column):
                 board[i][j] = 6
 
     # Geracao de buracos no tabuleiro
-    for i in range(row):
+    for i in range(2, row-1):
         board[i][random.randint(0,column-1)] = 1   # numero 1 indica que existe um buraco
-
+    
+    print(board)
     return board
     
 # Cria quadrado
@@ -70,55 +70,77 @@ def centralizeImage():
 
 # desenha tabuleiro
 def drawBoard(board):
-    for row in range(rows):
+
+    for row in range(rows):              
         for column in range(columns):
-            # desenha quadrado preto
             if board[row][column] == 0 or board[row][column] == 1:  # numero 1 indica que existe buraco
                 drawSquare(row, column, orange)
-            # desenha quadrado vermelho
-            # desenha quadrado amarelo
             elif board[row][column] == 2:
                 drawSquare(row, column, yellow)
                 player_loc.center = centralizeImage()
-            # desenha quadrado azul/linha de chegada
-            elif board[row][column] == 5:
-                drawSquare(row, column, blue)
-            # desenha quadrado rosa/linha de ponto de partida
-            elif board[row][column] == 6:
-                drawSquare(row, column, pink)
-            elif board[row][column] == 3:
-                drawSquare(row, column, white)
             elif board[row][column] == 4:
                 drawSquare(row, column, lightOrange)
+            elif board[row][column] == 5:
+                drawSquare(row, column, blue)
+            elif board[row][column] == 6:
+                drawSquare(row, column, pink)
             elif board[row][column] == 7:   # se for 7, indica que o buraco foi pisado
-                drawSquare(row, column, red)  
+                drawSquare(row, column, red) 
 
 # define movimento do jogador
 def movePlayer(direction):
-    global xPlayer, yPlayer, corLast, xTrail, yTrail
-    board[yPlayer][xPlayer] = 4 #rastro
-    board[yTrail][xTrail] = corLast
-    yTrail, xTrail = (yPlayer,xPlayer)
+    global xPlayer, yPlayer, trail, columns, rows, running
+
+    if len(trail) >= 1:
+        x, y, cor = trail.pop(0)
+        board[y][x] = cor
+
     xPlayer += direction[0]
     yPlayer += direction[1]
+    print(xPlayer, yPlayer)
 
     if board[yPlayer][xPlayer] == 1 or board[yPlayer][xPlayer] == 7: # caso ele passe em um buraco
         board[yPlayer][xPlayer] = 7
         xPlayer, yPlayer = (random.randint(0,columns-1),rows-1)
-    
-       
+        board[yPlayer][xPlayer] = 2
+        cleanTrail()
+        trail.append([xPlayer, yPlayer, 6])
+    elif  yPlayer<=1: # caso ele chegue ao final
+        win()
+        running = False
+    else:
+        drawTrail()
+        if [xPlayer, yPlayer, 6] not in trail:
+            trail.append([xPlayer, yPlayer, board[yPlayer][xPlayer]])
+        board[yPlayer][xPlayer] = 2
 
-    corLast = board[yPlayer][xPlayer]
-    board[yPlayer][xPlayer] = 2
+def drawTrail():
+    global trail
+    for i in trail:
+        X, Y, cor = i
+        board[Y][X] = 4
+
+def cleanTrail():
+    global trail
+    for i in range(len(trail)):
+        X, Y, cor = trail[i]
+        board[Y][X] = cor
+    trail = []
+    
+def win():
+    font = pygame.font.Font(None, 50)
+    text = font.render("Você Venceu!", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(board_width // 2, board_height // 2))
+    screen.blit(text, text_rect)
 
 
 board = createBoard(rows, columns)
 # posicao inicial do jogador
 player = xPlayer, yPlayer = (random.randint(0,columns-1),rows-1)
-# guarda a cor do ultimo quadrado que o jogador pisou
-corLast = board[yPlayer][xPlayer]
+#guarda ultimas possicoes do jogador para desenhar o rastro
+trail = []
+trail.append([xPlayer, yPlayer, board[yPlayer][xPlayer]])
 board[yPlayer][xPlayer] = 2
-yTrail, xTrail = (yPlayer,xPlayer)
 
 playerIcon = pygame.image.load('jujuba.png')
 playerIcon = pygame.transform.scale(playerIcon, (square_size, square_size))
