@@ -1,4 +1,4 @@
-import pygame
+import pygame, sys
 from pygame.locals import *
 import random
 
@@ -23,6 +23,9 @@ blue = (0, 0, 255)
 pink = (255, 20, 147)
 orange = (223, 118, 2)
 lightOrange = (255, 195, 128)
+lightBlue = '#5dc9ee'
+secondary_pink = '#ff799b'
+
 
 
 pygame.init()
@@ -147,29 +150,110 @@ playerIcon = pygame.transform.scale(playerIcon, (square_size, square_size))
 player_loc = playerIcon.get_rect()
 player_loc.center = centralizeImage()
 
-# Loop principal
-while running:
 
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            running = False
-        if event.type == KEYDOWN:
-            if event.key in [K_LEFT, K_a]:
-                if xPlayer > 0:
-                    movePlayer([-1,0])
-            if event.key in [K_RIGHT, K_d]:
-                if xPlayer < rows-1:
-                    movePlayer([1,0])
-            if event.key in [K_UP, K_w]:
-                if yPlayer > 0:
-                    movePlayer([0,-1])
-            if event.key in [K_DOWN, K_s]:
-                if yPlayer < rows-1:
-                    movePlayer([0,1])
+# Definir as fontes
+font = pygame.font.Font(None, 36)
 
+fontFooter = pygame.font.SysFont('verdana', 20, italic = pygame.font.Font.italic)
+
+def computer_play():
+    while True:
+
+        screen.fill("white")
+        
+
+        pygame.display.update()
+
+
+def play():
+
+    while True:
+    
         screen.fill(white)
         drawBoard(board)
         screen.blit(playerIcon, player_loc)
+        
+        for event in pygame.event.get():
+                
+            if event.type == KEYDOWN:
+                if event.key in [K_LEFT, K_a]:
+                    if xPlayer > 0:
+                        movePlayer([-1,0])
+                if event.key in [K_RIGHT, K_d]:
+                    if xPlayer < rows-1:
+                        movePlayer([1,0])
+                if event.key in [K_UP, K_w]:
+                    if yPlayer > 0:
+                        movePlayer([0,-1])
+                if event.key in [K_DOWN, K_s]:
+                    if yPlayer < rows-1:
+                        movePlayer([0,1])
+
         pygame.display.update()
+        
+
+def main_menu():
+    while True:
+        screen.fill(lightBlue)
+        
+        MENU_MOUSE_POS = pygame.mouse.get_pos()
+
+        # Texto do titulo
+
+        MENU_TEXT = font.render("TIP TOE - FALL GUYS", True, white)
+        MENU_RECT = MENU_TEXT.get_rect(center=(width/2, height * 0.2))
+
+
+        # Texto do rodape
+
+        FOOTER_TEXT = font.render("Trabalho de Grafos 1 - @AntonioRangelC e @kessJhones", True, white)
+        FOOTER_RECT = FOOTER_TEXT.get_rect(center=(width/2, height*0.9))
+
+
+        # Definir os botões
+
+        PLAY_BUTTON = pygame.Rect((width/3), (height/3), 300, 50)
+        PLAY_TEXT = font.render("Jogar Solo", True, white)
+        PLAY_TEXT_RECT = PLAY_TEXT.get_rect(center=PLAY_BUTTON.center)
+        
+        COMPUTER_PLAY_BUTTON = pygame.Rect((width/3), (height/3) + (height * 0.15), 300, 50)
+        COMPUTER_PLAY_TEXT = font.render("Jogar com amigos", True, white)
+        COMPUTER_PLAY_TEXT_RECT =  COMPUTER_PLAY_TEXT.get_rect(center=COMPUTER_PLAY_BUTTON.center)
+
+        QUIT_BUTTON = pygame.Rect((width/3), (height/3) + (height * 0.30), 300, 50)
+        QUIT_TEXT = font.render("Sair", True, white)
+        QUIT_TEXT_RECT = QUIT_TEXT.get_rect(center=QUIT_BUTTON.center)
+
+        pygame.draw.rect(screen, secondary_pink, PLAY_BUTTON)
+        pygame.draw.rect(screen, secondary_pink, COMPUTER_PLAY_BUTTON)
+        pygame.draw.rect(screen, secondary_pink, QUIT_BUTTON)
+
+        screen.blit(MENU_TEXT, MENU_RECT)
+        screen.blit(PLAY_TEXT, PLAY_TEXT_RECT)
+        screen.blit(COMPUTER_PLAY_TEXT, COMPUTER_PLAY_TEXT_RECT)
+        screen.blit(QUIT_TEXT, QUIT_TEXT_RECT)
+        screen.blit(FOOTER_TEXT, FOOTER_RECT)
+
+       
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
+                    play()
+                if COMPUTER_PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
+                    computer_play()
+                if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
+                    pygame.quit()
+                    sys.exit()
+
+        pygame.display.update()
+
+
+
+main_menu()
+    
 
 pygame.quit()
