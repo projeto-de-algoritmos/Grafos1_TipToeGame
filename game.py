@@ -8,11 +8,12 @@ square_size = 50
 square_margin = 3
 board_width = 8 * square_size + 9 * square_margin
 board_height = 8 * square_size + 9 * square_margin
-#define tamanho tabuleiro
 rows = 15
 columns = 15
 size = width, height = ((square_size + square_margin)*rows, (square_size + square_margin)*columns)
+# grafo para apartir do tabuleiro
 graph = gf.Graph(rows*columns)
+end = [int(i) for i in range(15, 29)]
 
 # cores
 black = (0, 0, 0)
@@ -30,12 +31,8 @@ secondary_pink = '#ff799b'
 
 
 pygame.init()
-running = True
-# Define o tamanho da tela
 screen = pygame.display.set_mode(size)
-# Define o título da janela
-pygame.display.set_caption("Encontre o caminho!")
-# delimita o tabuleiro
+pygame.display.set_caption("TIP TOE!")
 pygame.draw.rect(screen, green, (0,0, width, height), 5)
 
 # cria tabuleiro
@@ -57,7 +54,7 @@ def createBoard(row, column):
 
     # Geracao de buracos no tabuleiro
     for i in range(2, row-1):
-        board[i][random.randint(0,column-1)] = 1   # numero 1 indica que existe um buraco
+        board[i][random.randint(0,column-1)] = 1 # numero 1 indica que existe um buraco
     
     return board
     
@@ -111,12 +108,12 @@ def movePlayer(direction):
     elif  yPlayer<=1: # caso ele chegue ao final
         win()
     else:
-        drawTrail()
+        markTrail()
         if [xPlayer, yPlayer, 6] not in trail:
             trail.append([xPlayer, yPlayer, board[yPlayer][xPlayer]])
         board[yPlayer][xPlayer] = 2
 
-def drawTrail():
+def markTrail():
     global trail
     for i in trail:
         X, Y, cor = i
@@ -135,6 +132,15 @@ def win():
     text_rect = text.get_rect(center=(board_width // 2, board_height // 2))
     screen.blit(text, text_rect)
 
+# define movimento do computador
+def playComputer(player):
+    path = []
+    graph.matrix_to_graph(board)
+    start = graph.coordinates_to_index(player, board)
+    path = graph.dfs(start, end)
+    graph.clear_visited()
+    path = graph.path_to_moves(path, board)
+    return path
 
 
 board = createBoard(rows, columns)
@@ -160,9 +166,9 @@ def computer_play():
         screen.fill("white")
         pygame.display.update()
 
+count = 0
 
 def play():
-
     while True:
     
         screen.fill(white)
@@ -170,7 +176,9 @@ def play():
         screen.blit(playerIcon, player_loc)
         
         for event in pygame.event.get():
-                
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
             if event.type == KEYDOWN:
                 if event.key in [K_LEFT, K_a]:
                     if xPlayer > 0:
@@ -184,6 +192,16 @@ def play():
                 if event.key in [K_DOWN, K_s]:
                     if yPlayer < rows-1:
                         movePlayer([0,1])
+        
+        npc = playComputer(player)
+        global count
+        count += 1
+
+        if (count >= 100):
+            if len(npc) > 0:
+                x, y = npc.pop(0)
+                movePlayer([x, y])
+                count = 0
 
         pygame.display.update()
         
@@ -199,12 +217,10 @@ def main_menu():
         MENU_TEXT = font.render("TIP TOE - FALL GUYS", True, white)
         MENU_RECT = MENU_TEXT.get_rect(center=(width/2, height * 0.2))
 
-
         # Texto do rodape
 
         FOOTER_TEXT = font.render("Trabalho de Grafos 1 - @AntonioRangelC e @kessJhones", True, white)
         FOOTER_RECT = FOOTER_TEXT.get_rect(center=(width/2, height*0.9))
-
 
         # Definir os botões
 
@@ -230,8 +246,6 @@ def main_menu():
         screen.blit(QUIT_TEXT, QUIT_TEXT_RECT)
         screen.blit(FOOTER_TEXT, FOOTER_RECT)
 
-       
-        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -247,9 +261,5 @@ def main_menu():
 
         pygame.display.update()
 
-
-
 main_menu()
-    
-
 pygame.quit()

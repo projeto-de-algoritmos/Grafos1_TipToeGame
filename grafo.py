@@ -13,6 +13,9 @@ class Graph:
         self.adj_matrix[v1][v2] = 0
         self.adj_matrix[v2][v1] = 0
     
+    def clear_visited(self):
+        self.visited = [False] * self.num_vertices
+    
     #tranforma matriz em grafo
     def matrix_to_graph(self, matrix):
         element = 0
@@ -28,5 +31,95 @@ class Graph:
                         self.add_edge(element, element-len(matrix[i]))
                     if j-1 >= 0 and matrix[i][j-1] != 7:
                         self.add_edge(element, element-1)
-                self.add_edge(element, element)
+                if matrix[i][j] != 7:
+                    self.add_edge(element, element)
                 element += 1
+
+    # cria caminho entre dois pontos usando busca em profundidade
+    def dfs(self, start, end):
+        self.visited[start] = True
+        if start in end:
+            return [start]
+        for v in range(self.num_vertices):
+            if self.adj_matrix[start][v] == 1 and not self.visited[v]:
+                path = self.dfs(v, end)
+                if path:
+                    return [start] + path
+        return None
+    
+    # transforma caminho em lista de coordenadas
+    def path_to_coordinates(self, path, matrix):
+        coordinates = []
+        for i in path:
+            coordinates.append(self.index_to_coordinates(i, matrix))
+        return coordinates
+    
+    # transforma indice em coordenadas
+    def index_to_coordinates(self, index, matrix):
+        row = int(index) // len(matrix)
+        column = index % len(matrix)
+        return (row, column)
+    
+    # transforma coordenadas em indice
+    def coordinates_to_index(self, coordinates, matrix):
+        return coordinates[0]*len(matrix) + coordinates[1]
+    
+    # transforma caminho em lista de movimentos
+    def path_to_moves(self, path=[], matrix=[[]]):
+        moves = []
+        if path != None:
+            for i in range(len(path)-1):
+                moves.append(self.get_move(path[i], path[i+1], matrix))
+        return moves
+
+    # retorna movimento entre dois pontos
+    def get_move(self, start, end, matrix):
+        start = self.index_to_coordinates(start, matrix)
+        end = self.index_to_coordinates(end, matrix)
+        if start[0] == end[0]:
+            if start[1] > end[1]:
+                return [-1, 0]
+            else:
+                return [1, 0]
+        else:
+            if start[0] > end[0]:
+                return [0, -1]
+            else:
+                return [0, 1]
+
+""""
+board = []
+row = 15
+column = 15
+
+def printMatrixIndice(matrix):
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            if(matrix[i][j] == 1):
+                print(i, j, matrix[i][j], end=" | ")
+        print()
+
+
+
+for i in range(row):
+        board.append([])
+        for j in range(column):
+            board[i].append(0)
+            if i< 2: # duas primeiras linhas, que sao a linha de chegada
+                board[i][j] = 5
+                if i==0 and j%2==0:
+                    board[i][j] = 3
+                elif i==1 and j%2!=0:
+                    board[i][j] = 3  
+            elif i==(row-1):
+                board[i][j] = 6
+
+board[0][0] = 7
+board[2][2] = 7
+board[3][3] = 7
+
+gr = Graph(row*column)
+gr.matrix_to_graph(board)
+printMatrixIndice(gr.adj_matrix)
+
+"""
