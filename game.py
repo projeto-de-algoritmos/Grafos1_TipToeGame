@@ -1,6 +1,8 @@
-import pygame, sys
+import pygame
+import sys
 from pygame.locals import *
 import random
+import time
 import grafo as gf
 
 # Configurações do tabuleiro
@@ -10,7 +12,8 @@ board_width = 8 * square_size + 9 * square_margin
 board_height = 8 * square_size + 9 * square_margin
 rows = 15
 columns = 15
-size = width, height = ((square_size + square_margin)*rows, (square_size + square_margin)*columns)
+size = width, height = ((square_size + square_margin)
+                        * rows, (square_size + square_margin)*columns)
 # grafo para apartir do tabuleiro
 graph = gf.Graph(rows*columns)
 end = [int(i) for i in range(15, 29)]
@@ -33,31 +36,32 @@ secondary_pink = '#ff799b'
 pygame.init()
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("TIP TOE!")
-pygame.draw.rect(screen, green, (0,0, width, height), 5)
+pygame.draw.rect(screen, green, (0, 0, width, height), 5)
 
 # cria tabuleiro
 def createBoard(row, column):
-   
+
     board = []
     for i in range(row):
         board.append([])
         for j in range(column):
             board[i].append(0)
-            if i< 2: # duas primeiras linhas, que sao a linha de chegada
+            if i < 2:  # duas primeiras linhas, que sao a linha de chegada
                 board[i][j] = 5
-                if i==0 and j%2==0:
+                if i == 0 and j % 2 == 0:
                     board[i][j] = 3
-                elif i==1 and j%2!=0:
-                    board[i][j] = 3 
-            elif i==(row-1):
+                elif i == 1 and j % 2 != 0:
+                    board[i][j] = 3
+            elif i == (row-1):
                 board[i][j] = 6
 
     # Geracao de buracos no tabuleiro
     for i in range(2, row-1):
-        board[i][random.randint(0,column-1)] = 1 # numero 1 indica que existe um buraco
-    
+        # numero 1 indica que existe um buraco
+        board[i][random.randint(0, column-1)] = 1
+
     return board
-    
+
 # Cria quadrado
 def drawSquare(row, column, color):
     x = column * (square_size + square_margin) + square_margin
@@ -65,15 +69,21 @@ def drawSquare(row, column, color):
     rect = pygame.Rect(x, y, square_size, square_size)
     pygame.draw.rect(screen, color, rect)
 
+
 def centralizeImage():
     return (xPlayer * (square_size + square_margin) + square_margin + square_size/2, yPlayer * (square_size + square_margin) + square_margin + square_size/2)
+
+
+def startPosition():
+    return (2, rows-1)
 
 # desenha tabuleiro
 def drawBoard(board):
 
-    for row in range(rows):              
+    for row in range(rows):
         for column in range(columns):
-            if board[row][column] == 0 or board[row][column] == 1:  # numero 1 indica que existe buraco
+            # numero 1 indica que existe buraco
+            if board[row][column] == 0 or board[row][column] == 1:
                 drawSquare(row, column, orange)
             elif board[row][column] == 2:
                 drawSquare(row, column, yellow)
@@ -85,11 +95,11 @@ def drawBoard(board):
             elif board[row][column] == 6:
                 drawSquare(row, column, pink)
             elif board[row][column] == 7:   # se for 7, indica que o buraco foi pisado
-                drawSquare(row, column, red) 
+                drawSquare(row, column, red)
 
 # define movimento do jogador
-def movePlayer(direction):
-    global xPlayer, yPlayer, trail, columns, rows
+def movePlayer(direction, mode):
+    global xPlayer, yPlayer, trail
 
     if len(trail) >= 1:
         x, y, cor = trail.pop(0)
@@ -98,20 +108,29 @@ def movePlayer(direction):
     xPlayer += direction[0]
     yPlayer += direction[1]
 
-    if board[yPlayer][xPlayer] == 1 or board[yPlayer][xPlayer] == 7: # caso ele passe em um buraco
+    if recordMoviments() and mode == 'computer':
+        return False
+    else:
+        return True
+    
+def recordMoviments():
+    global xPlayer, yPlayer, trail
+
+    if board[yPlayer][xPlayer] == 1 or board[yPlayer][xPlayer] == 7:  # caso ele passe em um buraco
         board[yPlayer][xPlayer] = 7
-        xPlayer, yPlayer = (random.randint(0,columns-1),rows-1)
+        xPlayer, yPlayer = startPosition()
         board[yPlayer][xPlayer] = 2
         cleanTrail()
         trail.append([xPlayer, yPlayer, 6])
-        graph.matrix_to_graph(board)
-    elif  yPlayer<=1: # caso ele chegue ao final
+        return False
+    elif yPlayer <= 1:  # caso ele chegue ao final
         win()
     else:
         markTrail()
         if [xPlayer, yPlayer, 6] not in trail:
             trail.append([xPlayer, yPlayer, board[yPlayer][xPlayer]])
         board[yPlayer][xPlayer] = 2
+        return True
 
 def markTrail():
     global trail
@@ -125,27 +144,24 @@ def cleanTrail():
         X, Y, cor = trail[i]
         board[Y][X] = cor
     trail = []
-    
+
 def win():
-    font = pygame.font.Font(None, 50)
-    text = font.render("Você Venceu!", True, (255, 255, 255))
-    text_rect = text.get_rect(center=(board_width // 2, board_height // 2))
-    screen.blit(text, text_rect)
+    print("Voce ganhou!")
 
 # define movimento do computador
 def playComputer(player):
     path = []
-    graph.matrix_to_graph(board)
-    start = graph.coordinates_to_index(player, board)
+    graph.matrixToGraph(board)
+    start = graph.coordinatesToIndex(player, board)
     path = graph.dfs(start, end)
-    graph.clear_visited()
-    path = graph.path_to_moves(path, board)
+    graph.clearVisited()
+    print(path)
+    path = graph.pathToMoves(path, board)
     return path
 
 
 board = createBoard(rows, columns)
-# posicao inicial do jogador
-player = xPlayer, yPlayer = (random.randint(0,columns-1),rows-1)
+player = xPlayer, yPlayer = startPosition()
 trail = []
 trail.append([xPlayer, yPlayer, board[yPlayer][xPlayer]])
 board[yPlayer][xPlayer] = 2
@@ -158,23 +174,37 @@ player_loc.center = centralizeImage()
 
 # Definir as fontes
 font = pygame.font.Font(None, 36)
+fontFooter = pygame.font.SysFont('verdana', 20, italic=pygame.font.Font.italic)
 
-fontFooter = pygame.font.SysFont('verdana', 20, italic = pygame.font.Font.italic)
 
-def computer_play():
+def computer_play(path):
     while True:
-        screen.fill("white")
-        pygame.display.update()
 
-count = 0
-
-def play():
-    while True:
-    
         screen.fill(white)
         drawBoard(board)
         screen.blit(playerIcon, player_loc)
-        
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        if len(path) > 0:
+            x, y = path.pop(0)
+            if movePlayer([x, y], 'computer'):
+                path = playComputer(player)
+            time.sleep(1)
+
+        pygame.display.update()
+
+
+def play():
+    while True:
+
+        screen.fill(white)
+        drawBoard(board)
+        screen.blit(playerIcon, player_loc)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -182,34 +212,24 @@ def play():
             if event.type == KEYDOWN:
                 if event.key in [K_LEFT, K_a]:
                     if xPlayer > 0:
-                        movePlayer([-1,0])
+                        movePlayer([-1, 0], 'player')
                 if event.key in [K_RIGHT, K_d]:
                     if xPlayer < rows-1:
-                        movePlayer([1,0])
+                        movePlayer([1, 0], 'player')
                 if event.key in [K_UP, K_w]:
                     if yPlayer > 0:
-                        movePlayer([0,-1])
+                        movePlayer([0, -1], 'player')
                 if event.key in [K_DOWN, K_s]:
                     if yPlayer < rows-1:
-                        movePlayer([0,1])
-        
-        npc = playComputer(player)
-        global count
-        count += 1
-
-        if (count >= 100):
-            if len(npc) > 0:
-                x, y = npc.pop(0)
-                movePlayer([x, y])
-                count = 0
+                        movePlayer([0, 1], 'player')
 
         pygame.display.update()
-        
+
 
 def main_menu():
     while True:
         screen.fill(lightBlue)
-        
+
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
         # Texto do titulo
@@ -219,7 +239,8 @@ def main_menu():
 
         # Texto do rodape
 
-        FOOTER_TEXT = font.render("Trabalho de Grafos 1 - @AntonioRangelC e @kessJhones", True, white)
+        FOOTER_TEXT = font.render(
+            "Trabalho de Grafos 1 - @AntonioRangelC e @kessJhones", True, white)
         FOOTER_RECT = FOOTER_TEXT.get_rect(center=(width/2, height*0.9))
 
         # Definir os botões
@@ -227,12 +248,15 @@ def main_menu():
         PLAY_BUTTON = pygame.Rect((width/3), (height/3), 300, 50)
         PLAY_TEXT = font.render("Jogar Solo", True, white)
         PLAY_TEXT_RECT = PLAY_TEXT.get_rect(center=PLAY_BUTTON.center)
-        
-        COMPUTER_PLAY_BUTTON = pygame.Rect((width/3), (height/3) + (height * 0.15), 300, 50)
-        COMPUTER_PLAY_TEXT = font.render("Jogar com amigos", True, white)
-        COMPUTER_PLAY_TEXT_RECT =  COMPUTER_PLAY_TEXT.get_rect(center=COMPUTER_PLAY_BUTTON.center)
 
-        QUIT_BUTTON = pygame.Rect((width/3), (height/3) + (height * 0.30), 300, 50)
+        COMPUTER_PLAY_BUTTON = pygame.Rect(
+            (width/3), (height/3) + (height * 0.15), 300, 50)
+        COMPUTER_PLAY_TEXT = font.render("Jogar com amigos", True, white)
+        COMPUTER_PLAY_TEXT_RECT = COMPUTER_PLAY_TEXT.get_rect(
+            center=COMPUTER_PLAY_BUTTON.center)
+
+        QUIT_BUTTON = pygame.Rect(
+            (width/3), (height/3) + (height * 0.30), 300, 50)
         QUIT_TEXT = font.render("Sair", True, white)
         QUIT_TEXT_RECT = QUIT_TEXT.get_rect(center=QUIT_BUTTON.center)
 
@@ -254,7 +278,8 @@ def main_menu():
                 if PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
                     play()
                 if COMPUTER_PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
-                    computer_play()
+                    path = playComputer(player)
+                    computer_play(path)
                 if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
                     pygame.quit()
                     sys.exit()
