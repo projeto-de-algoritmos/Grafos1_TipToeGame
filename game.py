@@ -146,7 +146,49 @@ def cleanTrail():
     trail = []
 
 def win():
-    print("Voce ganhou!")
+    screen.fill(lightBlue)
+    while True:
+        MENU_MOUSE_POS = pygame.mouse.get_pos()
+
+        # Texto do titulo
+
+        WIN_TEXT = font.render("PARABÉNS ! VOCÊ VENCEU", True, white)
+        WIN_RECT = WIN_TEXT.get_rect(center=(width/2, height * 0.15))
+
+        
+
+        # Definir os botões
+
+        MENU_BUTTON = pygame.Rect((width/3), (height/3), 300, 50)
+        MENU_TEXT = font.render("Voltar ao menu", True, white)
+        MENU_TEXT_RECT = MENU_TEXT.get_rect(center=MENU_BUTTON.center)
+
+        
+        QUIT_BUTTON = pygame.Rect(
+            (width/3), (height/3) + (height * 0.10), 300, 50)
+        QUIT_TEXT = font.render("Sair", True, white)
+        QUIT_TEXT_RECT = QUIT_TEXT.get_rect(center=QUIT_BUTTON.center)
+
+        pygame.draw.rect(screen, secondary_pink, MENU_BUTTON)
+        pygame.draw.rect(screen, secondary_pink, QUIT_BUTTON)
+
+        screen.blit(WIN_TEXT, WIN_RECT)
+        screen.blit(MENU_TEXT, MENU_TEXT_RECT)
+        screen.blit(QUIT_TEXT, QUIT_TEXT_RECT)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if MENU_BUTTON.collidepoint(MENU_MOUSE_POS):
+                    main_menu()
+
+                if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
+                    pygame.quit()
+                    sys.exit()
+
+        pygame.display.update()
 
 # define movimento do computador
 def playComputer(player):
@@ -246,12 +288,12 @@ def main_menu():
         # Definir os botões
 
         PLAY_BUTTON = pygame.Rect((width/3), (height/3), 300, 50)
-        PLAY_TEXT = font.render("Jogar Solo", True, white)
+        PLAY_TEXT = font.render("Jogador vs Máquina", True, white)
         PLAY_TEXT_RECT = PLAY_TEXT.get_rect(center=PLAY_BUTTON.center)
 
         COMPUTER_PLAY_BUTTON = pygame.Rect(
             (width/3), (height/3) + (height * 0.15), 300, 50)
-        COMPUTER_PLAY_TEXT = font.render("Jogar com amigos", True, white)
+        COMPUTER_PLAY_TEXT = font.render("Máquina vs Máquina", True, white)
         COMPUTER_PLAY_TEXT_RECT = COMPUTER_PLAY_TEXT.get_rect(
             center=COMPUTER_PLAY_BUTTON.center)
 
