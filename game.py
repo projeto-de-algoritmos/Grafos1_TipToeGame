@@ -46,6 +46,8 @@ def createBoard(row, column):
         board.append([])
         for j in range(column):
             board[i].append(0)
+            if i == 12 and j == 2:
+                board[i][j] = 7
             if i < 2:  # duas primeiras linhas, que sao a linha de chegada
                 board[i][j] = 5
                 if i == 0 and j % 2 == 0:
@@ -100,10 +102,6 @@ def drawBoard(board):
 # define movimento do jogador
 def movePlayer(direction, mode):
     global xPlayer, yPlayer, trail
-
-    if len(trail) >= 1:
-        x, y, cor = trail.pop(0)
-        board[y][x] = cor
 
     xPlayer += direction[0]
     yPlayer += direction[1]
@@ -192,15 +190,18 @@ def win():
 
 # define movimento do computador
 def playComputer(player):
-    path = []
+    print(board)
     graph.matrixToGraph(board)
-    start = graph.coordinatesToIndex(player, board)
+    printMatrixIndice(graph.adj_matrix)
+    start = graph.coordinatesToIndex(player,board)
     path = graph.dfs(start, end)
-    graph.clearVisited()
     print(path)
     path = graph.pathToMoves(path, board)
+    print(path)
+
     return path
 
+    
 
 board = createBoard(rows, columns)
 player = xPlayer, yPlayer = startPosition()
@@ -218,6 +219,13 @@ player_loc.center = centralizeImage()
 font = pygame.font.Font(None, 36)
 fontFooter = pygame.font.SysFont('verdana', 20, italic=pygame.font.Font.italic)
 
+def printGrafo():
+    for i in range(len(graph.adj_matrix)):
+        for j in range(len(graph.adj_matrix[i])):
+            if graph.adj_matrix[i][j]==1:
+                print(i, j, graph.adj_matrix[i][j])
+        print()
+
 
 def computer_play(path):
     while True:
@@ -231,11 +239,13 @@ def computer_play(path):
                 pygame.quit()
                 sys.exit()
 
-        if len(path) > 0:
+        if path is not None and len(path) > 0:
             x, y = path.pop(0)
             if movePlayer([x, y], 'computer'):
+                print(player)
                 path = playComputer(player)
-            time.sleep(1)
+                print(path)
+            time.sleep(0.7)
 
         pygame.display.update()
 
@@ -267,6 +277,12 @@ def play():
 
         pygame.display.update()
 
+def printMatrixIndice(matrix):
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            if(matrix[i][j] == 1):
+                print(i, j, matrix[i][j], end=" | ")
+        print()
 
 def main_menu():
     while True:
