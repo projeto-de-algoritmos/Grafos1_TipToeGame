@@ -16,7 +16,7 @@ size = width, height = ((square_size + square_margin)
                         * rows, (square_size + square_margin)*columns)
 # grafo para apartir do tabuleiro
 graph = gf.Graph(rows*columns)
-end = [int(i) for i in range(15, 29)]
+end = [int(i) for i in range(0, 14)]
 
 # cores
 black = (0, 0, 0)
@@ -34,8 +34,8 @@ secondary_pink = '#ff799b'
 
 
 pygame.init()
-screen = pygame.display.set_mode(size)
-pygame.display.set_caption("TIP TOE!")
+screen = pygame.display.set_mode(size,pygame.FULLSCREEN)
+pygame.display.set_caption('TIP TOE') 
 pygame.draw.rect(screen, green, (0, 0, width, height), 5)
 
 # cria tabuleiro
@@ -46,8 +46,6 @@ def createBoard(row, column):
         board.append([])
         for j in range(column):
             board[i].append(0)
-            if i == 12 and j == 2:
-                board[i][j] = 7
             if i < 2:  # duas primeiras linhas, que sao a linha de chegada
                 board[i][j] = 5
                 if i == 0 and j % 2 == 0:
@@ -61,6 +59,8 @@ def createBoard(row, column):
     for i in range(2, row-1):
         # numero 1 indica que existe um buraco
         board[i][random.randint(0, column-1)] = 1
+        board[i][random.randint(0, column-1)] = 1
+
 
     return board
 
@@ -77,7 +77,7 @@ def centralizeImage():
 
 
 def startPosition():
-    return (2, rows-1)
+    return (random.randint(0,columns-1), rows-1)
 
 # desenha tabuleiro
 def drawBoard(board):
@@ -121,7 +121,12 @@ def recordMoviments():
         cleanTrail()
         trail.append([xPlayer, yPlayer, 6])
         return False
-    elif yPlayer <= 1:  # caso ele chegue ao final
+    elif board[yPlayer][xPlayer] == 5:  # caso ele chegue ao final
+        xPlayer, yPlayer = startPosition()
+        board[yPlayer][xPlayer] = 2
+        cleanTrail()
+        trail.append([xPlayer, yPlayer, 6])
+        player_loc.center = centralizeImage()
         win()
     else:
         markTrail()
@@ -145,6 +150,8 @@ def cleanTrail():
 
 def win():
     screen.fill(lightBlue)
+    global board
+    board = createBoard(rows, columns)
     while True:
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
@@ -154,7 +161,6 @@ def win():
         WIN_RECT = WIN_TEXT.get_rect(center=(width/2, height * 0.15))
 
         
-
         # Definir os botões
 
         MENU_BUTTON = pygame.Rect((width/3), (height/3), 300, 50)
@@ -190,19 +196,14 @@ def win():
 
 # define movimento do computador
 def playComputer(player):
-    print(board)
     graph.matrixToGraph(board)
-    printMatrixIndice(graph.adj_matrix)
     start = graph.coordinatesToIndex(player,board)
     path = graph.dfs(start, end)
-    print(path)
     path = graph.pathToMoves(path, board)
-    print(path)
 
     return path
 
     
-
 board = createBoard(rows, columns)
 player = xPlayer, yPlayer = startPosition()
 trail = []
@@ -219,17 +220,9 @@ player_loc.center = centralizeImage()
 font = pygame.font.Font(None, 36)
 fontFooter = pygame.font.SysFont('verdana', 20, italic=pygame.font.Font.italic)
 
-def printGrafo():
-    for i in range(len(graph.adj_matrix)):
-        for j in range(len(graph.adj_matrix[i])):
-            if graph.adj_matrix[i][j]==1:
-                print(i, j, graph.adj_matrix[i][j])
-        print()
-
-
 def computer_play(path):
     while True:
-
+        
         screen.fill(white)
         drawBoard(board)
         screen.blit(playerIcon, player_loc)
@@ -245,7 +238,7 @@ def computer_play(path):
                 print(player)
                 path = playComputer(player)
                 print(path)
-            time.sleep(0.7)
+            time.sleep(0.5)
 
         pygame.display.update()
 
