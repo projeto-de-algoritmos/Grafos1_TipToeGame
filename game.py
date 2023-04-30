@@ -16,7 +16,7 @@ size = width, height = ((square_size + square_margin)
                         * rows, (square_size + square_margin)*columns)
 # grafo para apartir do tabuleiro
 graph = gf.Graph(rows*columns)
-end = [int(i) for i in range(0, 14)]
+end = [int(i) for i in range(15, 29)]
 
 # cores
 black = (0, 0, 0)
@@ -34,7 +34,7 @@ secondary_pink = '#ff799b'
 
 
 pygame.init()
-screen = pygame.display.set_mode(size,pygame.FULLSCREEN)
+screen = pygame.display.set_mode(size)
 pygame.display.set_caption('TIP TOE') 
 pygame.draw.rect(screen, green, (0, 0, width, height), 5)
 
@@ -116,18 +116,23 @@ def recordMoviments():
 
     if board[yPlayer][xPlayer] == 1 or board[yPlayer][xPlayer] == 7:  # caso ele passe em um buraco
         board[yPlayer][xPlayer] = 7
+        index = graph.coordinatesToIndex([xPlayer, yPlayer], board)
+        graph.removeBlock(index)
         xPlayer, yPlayer = startPosition()
         board[yPlayer][xPlayer] = 2
         cleanTrail()
         trail.append([xPlayer, yPlayer, 6])
         return False
-    elif board[yPlayer][xPlayer] == 5:  # caso ele chegue ao final
+    
+    elif yPlayer == 1:  # caso ele chegue ao final
+        time.sleep(2.6)
         xPlayer, yPlayer = startPosition()
         board[yPlayer][xPlayer] = 2
         cleanTrail()
         trail.append([xPlayer, yPlayer, 6])
         player_loc.center = centralizeImage()
         win()
+
     else:
         markTrail()
         if [xPlayer, yPlayer, 6] not in trail:
@@ -152,6 +157,7 @@ def win():
     screen.fill(lightBlue)
     global board
     board = createBoard(rows, columns)
+    graph.matrixToGraph(board)
     while True:
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
@@ -195,16 +201,18 @@ def win():
         pygame.display.update()
 
 # define movimento do computador
-def playComputer(player):
-    graph.matrixToGraph(board)
-    start = graph.coordinatesToIndex(player,board)
+def playComputer():
+    global xPlayer, yPlayer, board
+    start = graph.coordinatesToIndex([xPlayer,yPlayer],board)
     path = graph.dfs(start, end)
+    graph.clearVisited()
     path = graph.pathToMoves(path, board)
 
     return path
 
     
 board = createBoard(rows, columns)
+graph.matrixToGraph(board)
 player = xPlayer, yPlayer = startPosition()
 trail = []
 trail.append([xPlayer, yPlayer, board[yPlayer][xPlayer]])
@@ -220,7 +228,8 @@ player_loc.center = centralizeImage()
 font = pygame.font.Font(None, 36)
 fontFooter = pygame.font.SysFont('verdana', 20, italic=pygame.font.Font.italic)
 
-def computer_play(path):
+def computer_play():
+    path = playComputer()
     while True:
         
         screen.fill(white)
@@ -232,13 +241,12 @@ def computer_play(path):
                 pygame.quit()
                 sys.exit()
 
-        if path is not None and len(path) > 0:
+        if path != None and len(path) > 0:
             x, y = path.pop(0)
             if movePlayer([x, y], 'computer'):
-                print(player)
-                path = playComputer(player)
-                print(path)
-            time.sleep(0.5)
+                path = playComputer()
+        
+        time.sleep(0.5)
 
         pygame.display.update()
 
@@ -269,13 +277,6 @@ def play():
                         movePlayer([0, 1], 'player')
 
         pygame.display.update()
-
-def printMatrixIndice(matrix):
-    for i in range(len(matrix)):
-        for j in range(len(matrix[i])):
-            if(matrix[i][j] == 1):
-                print(i, j, matrix[i][j], end=" | ")
-        print()
 
 def main_menu():
     while True:
@@ -329,8 +330,7 @@ def main_menu():
                 if PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
                     play()
                 if COMPUTER_PLAY_BUTTON.collidepoint(MENU_MOUSE_POS):
-                    path = playComputer(player)
-                    computer_play(path)
+                    computer_play()
                 if QUIT_BUTTON.collidepoint(MENU_MOUSE_POS):
                     pygame.quit()
                     sys.exit()

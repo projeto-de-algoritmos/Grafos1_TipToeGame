@@ -19,7 +19,7 @@ class Graph:
     
     def clearVisited(self):
         self.visited = [False] * self.num_vertices
-    
+
     #tranforma matriz em grafo
     def matrixToGraph(self, matrix):
         element = 0
@@ -37,6 +37,13 @@ class Graph:
                     if j-1 >= 0 and matrix[i][j-1] != 7:
                         self.addEdge(element, element-1)
                 element += 1
+
+    def removeBlock(self, index):
+        for i in range(len(self.adj_matrix)):
+            # limpa linha do index 
+            self.adj_matrix[index][i] = 0
+            # limpa coluna do index
+            self.adj_matrix[i][index] = 0
 
     # cria caminho entre dois pontos usando busca em profundidade
     def dfs(self, start, end):
@@ -90,7 +97,7 @@ class Graph:
             else:
                 return [0, 1]
             
-"""
+
 board = []
 row = 15
 column = 15
@@ -112,10 +119,3 @@ for i in range(row):
                     board[i][j] = 3  
             elif i==(row-1):
                 board[i][j] = 6
-board[0][0] = 7
-board[2][2] = 7
-board[3][3] = 7
-gr = Graph(row*column)
-gr.matrixToGraph(board)
-printMatrixIndice(gr.adj_matrix)
-"""
