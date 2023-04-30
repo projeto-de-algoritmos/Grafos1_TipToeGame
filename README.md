@@ -21,11 +21,15 @@ As regras do jogo são:
 
 ## Screenshots
 Adicione 3 ou mais screenshots do projeto em funcionamento.
+![image](https://user-images.githubusercontent.com/57496213/235377340-cd8174f9-8242-4a71-a546-f5032507934f.png)
+![image](https://user-images.githubusercontent.com/57496213/235377383-6e0ac600-bc29-4183-8fb3-7ea26d2a7426.png)
+![image](https://user-images.githubusercontent.com/57496213/235377391-dee19726-c3d5-47e9-a113-9c1de655362f.png)
+
 
 ## Instalação 
 **Linguagem**: Python3<br>
 Necessário instalar o pygame
 
 ## Uso 
-Para rodar o projeto basta executar o arquivo main.py
+Para rodar o projeto basta executar ```python game.py```
 
