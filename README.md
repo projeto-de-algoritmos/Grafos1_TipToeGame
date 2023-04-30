@@ -18,6 +18,9 @@ As regras do jogo são:
 - Ao cair em um buraco, o jogador volta para o início e o buraco fica marcado até o final da partida.
 - O jogo termina quando o jogador chega na linha de chegada.
   
+## Vídeo de apresentação
+
+https://www.youtube.com/watch?v=m_QEub9gWzQ
 
 ## Screenshots
 Adicione 3 ou mais screenshots do projeto em funcionamento.
